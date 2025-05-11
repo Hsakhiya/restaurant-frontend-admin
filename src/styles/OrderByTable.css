@@ -1,0 +1,132 @@
+/* OrdersByTable.css */
+
+body {
+    margin: 0;
+    padding: 0;
+    background: none; /* Ensure no background on the body */
+}
+
+.orders-by-table {
+    padding: 20px;
+    background-color: transparent; /* No background for the main container */
+    color: #ffffff; /* Light text for readability */
+    font-family: Arial, sans-serif;
+}
+
+.table-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    border: 1px solid #333; /* Dark border to match dark theme */
+    border-radius: 8px;
+    background-color: #1e1e1e; /* Dark background for the table sections */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    transition: box-shadow 0.3s ease-in-out;
+}
+
+.table-section:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.table-section h2 {
+    font-size: 26px;
+    font-weight: 600;
+    color: #ffffff; /* White color for headings */
+    margin-bottom: 15px;
+    text-transform: uppercase; /* Optional: make headings stand out */
+}
+
+.order-item {
+    margin: 15px 0;
+    padding: 15px;
+    background-color: #2a2a2a; /* Slightly lighter background for individual orders */
+    border-radius: 5px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.3s ease;
+}
+
+.order-item:hover {
+    background-color: #3b3b3b; /* Darker background on hover for better interactivity */
+}
+
+.order-item p {
+    font-size: 16px;
+    margin-bottom: 8px;
+    color: #ddd; /* Lighter text for order details */
+}
+
+.order-item ul {
+    list-style-type: none; /* Remove bullet points */
+    padding-left: 0;
+    margin: 0; /* Ensure no default margins */
+}
+
+.order-item li {
+    font-size: 14px;
+    color: #bbb; /* Lighter color for list items */
+    margin-bottom: 5px;
+}
+
+.order-item li:last-child {
+    margin-bottom: 0;
+}
+
+.order-item li strong {
+    color: #ffffff; /* White for stronger elements like "Order ID" */
+}
+
+ul {
+    padding-left: 0; /* Make sure no padding for all unordered lists */
+    list-style-type: none; /* Ensure no bullet points */
+}
+
+.error {
+    color: red;
+    font-weight: bold;
+    font-size: 18px;
+    margin-top: 20px;
+}
+
+h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #ffffff; /* White for the title */
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+@media (max-width: 768px) {
+    .orders-by-table {
+        padding: 15px;
+    }
+
+    .table-section {
+        padding: 15px;
+    }
+
+    .order-item {
+        padding: 12px;
+    }
+
+    .order-item p {
+        font-size: 14px;
+    }
+
+    .order-item li {
+        font-size: 12px;
+    }
+}
+
+
+/* Adjust price font size */
+.order-item .price {
+    font-size: 15px; /* Smaller font for price */
+    color: #aaa;      /* Optional: make it more subtle */
+    font-weight: 400;
+  }
+  
+  /* Adjust item name font size */
+  .order-item li .item-name {
+    font-size: 18px; /* Larger font for item names */
+    color: #fff;
+    font-weight: 600;
+  }
