@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import API from '../api'; // Adjust if needed
 import './EditMenuItemModal.css';
 
-function EditMenuItemModal({ isOpen, item, onClose, onSave, mode }) {
+function EditMenuItemModal({ isOpen, item, onClose, onSave, onDelete, mode }) {
   const [form, setForm] = useState({
     name: '',
     description: '',
@@ -9,11 +10,37 @@ function EditMenuItemModal({ isOpen, item, onClose, onSave, mode }) {
     category: '',
     jainAvailable: false,
     image: '',
-    availability: true // Add availability field to form
+    availability: true,
   });
+
+  const [categories, setCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+  const [categoriesError, setCategoriesError] = useState(null);
 
   useEffect(() => {
     if (isOpen) {
+      // Fetch categories whenever modal opens
+      const fetchCategories = async () => {
+        try {
+          setLoadingCategories(true);
+          const response = await API.get('/categories');
+          setCategories(response.data);
+          setCategoriesError(null);
+          // If new item or no category selected, default to first category
+          if ((!form.category || form.category === '') && response.data.length > 0) {
+            setForm(prev => ({ ...prev, category: response.data[0]._id || response.data[0].name }));
+          }
+        } catch (error) {
+          setCategoriesError('Failed to load categories');
+          console.error(error);
+        } finally {
+          setLoadingCategories(false);
+        }
+      };
+
+      fetchCategories();
+
+      // Populate form fields on edit or reset on add
       if (mode === 'edit' && item) {
         setForm({
           name: item.name || '',
@@ -22,33 +49,33 @@ function EditMenuItemModal({ isOpen, item, onClose, onSave, mode }) {
           category: item.category || '',
           jainAvailable: item.jainAvailable || false,
           image: item.image || '',
-          availability: item.availability || true // Make sure availability is set
+          availability: item.availability ?? true,
         });
       } else {
         setForm({
           name: '',
           description: '',
           price: '',
-          category: '',
+          category: '', // will be set by fetchCategories default if empty
           jainAvailable: false,
           image: '',
-          availability: true // Default availability for a new item
+          availability: true,
         });
       }
     }
-  }, [isOpen, item, mode]);
+  }, [form.category,isOpen, item, mode]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(form); // Make sure the form data includes availability
+    onSave(form);
   };
 
   if (!isOpen) return null;
@@ -81,13 +108,27 @@ function EditMenuItemModal({ isOpen, item, onClose, onSave, mode }) {
             onChange={handleChange}
             required
           />
-          <input
-            name="category"
-            placeholder="Category"
-            value={form.category}
-            onChange={handleChange}
-            required
-          />
+
+          {/* Category select dropdown */}
+          {loadingCategories ? (
+            <div>Loading categories...</div>
+          ) : categoriesError ? (
+            <div className="error">{categoriesError}</div>
+          ) : (
+            <select
+              name="category"
+              value={form.category}
+              onChange={handleChange}
+              required
+            >
+              {categories.map((cat) => (
+                <option key={cat._id} value={cat._id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+          )}
+
           <label>
             <input
               type="checkbox"
@@ -113,11 +154,29 @@ function EditMenuItemModal({ isOpen, item, onClose, onSave, mode }) {
             />
             Available
           </label>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <button type="submit">
+
+          <div className="button-row">
+            <button type="submit" className='delete-btn'>
               {mode === 'edit' ? 'Save Changes' : 'Add Item'}
             </button>
-            <button type="button" onClick={onClose} style={{ background: '#666' }}>
+            {mode === 'edit' && (
+              <button
+                className="delete-btn"
+                type="button"
+                onClick={() => {
+                  if (window.confirm('Are you sure you want to delete this item?')) {
+                    onDelete(item._id);
+                  }
+                }}
+              >
+                Delete
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="cancel-btn"
+            >
               Cancel
             </button>
           </div>

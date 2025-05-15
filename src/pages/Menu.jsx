@@ -7,28 +7,32 @@ import { FaPlus } from 'react-icons/fa';
 
 function Menu() {
   const [menu, setMenu] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [categories, setCategories] = useState([{ _id: 'all', name: 'All' }]); // categories from API
+  const [selectedCategory, setSelectedCategory] = useState('all'); // use _id for selection
   const [loading, setLoading] = useState(true);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
 
   useEffect(() => {
-    async function fetchMenu() {
+    async function fetchData() {
       try {
-        const response = await API.get('/menu');
-        setMenu(response.data);
-        const uniqueCategories = ['All', ...new Set(response.data.map(item => item.category))];
-        setCategories(uniqueCategories);
+        // Fetch categories
+        const categoriesResponse = await API.get('/categories');
+        // Prepend "All" category
+        setCategories([{ _id: 'all', name: 'All' }, ...categoriesResponse.data]);
+
+        // Fetch menu items
+        const menuResponse = await API.get('/menu');
+        setMenu(menuResponse.data);
       } catch (err) {
-        alert('Failed to fetch menu');
+        alert('Failed to fetch data');
       } finally {
         setLoading(false);
       }
     }
 
-    fetchMenu();
+    fetchData();
   }, []);
 
   const handleAvailabilityChange = (id, newAvailability) => {
@@ -65,12 +69,26 @@ function Menu() {
     }
   };
 
+  const handleDeleteProduct = async (id) => {
+    try {
+      await API.delete(`/menu/${id}`);
+      // Remove deleted item from the menu state
+      setMenu(prev => prev.filter(item => item._id !== id));
+      setModalOpen(false);
+      setEditItem(null);
+    } catch (error) {
+      alert('Failed to delete the item');
+    }
+  };
+  
+
   const openAddModal = () => {
     setEditItem(null);
     setModalOpen(true);
   };
 
-  const filteredMenu = selectedCategory === 'All'
+  // Filter menu items by selected category _id ('all' means no filtering)
+  const filteredMenu = selectedCategory === 'all'
     ? menu
     : menu.filter(item => item.category === selectedCategory);
 
@@ -79,13 +97,13 @@ function Menu() {
       <h1 className="menu-heading">Our Menu</h1>
 
       <div className="category-buttons">
-        {categories.map(category => (
+        {categories.map(cat => (
           <button
-            key={category}
-            className={`category-btn ${selectedCategory === category ? 'active' : ''}`}
-            onClick={() => setSelectedCategory(category)}
+            key={cat._id}
+            className={`category-btn ${selectedCategory === cat._id ? 'active' : ''}`}
+            onClick={() => setSelectedCategory(cat._id)}
           >
-            {category}
+            {cat.name}
           </button>
         ))}
       </div>
@@ -121,6 +139,7 @@ function Menu() {
           setEditItem(null);
         }}
         onSave={handleSaveProduct}
+        onDelete={handleDeleteProduct}
         mode={editItem ? 'edit' : 'add'}
       />
     </div>
